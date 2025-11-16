@@ -2,26 +2,30 @@ package io.github.nekosora.utils;
 
 import io.github.nekosora.context.GameContext;
 import io.github.nekosora.settings.GameSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 
 public class GameUtils {
+    private static final Logger log = LoggerFactory.getLogger(GameUtils.class);
+
     public static void exitGame(ExitReason exitReason) {
         GameContext.isExiting = true;
-        System.out.println("Exiting game...");
+        log.info("Exiting game...");
 
         if (exitReason == ExitReason.exitGameFileDetected) {
             File exitGame = new File(GameSettings.mainDir, "GameExit.on");
             if (exitGame.exists()) {
                 if (!exitGame.delete()) {
-                    System.err.println("Could not delete " + exitGame.getAbsolutePath());
+                    log.error("Could not delete {}", exitGame.getAbsolutePath());
                 }
             }
         }
 
         GameFileUtils.cleanupMarkedFiles();
 
-        System.out.println("Bye!");
+        log.info("Bye!");
         System.exit(0);
     }
 

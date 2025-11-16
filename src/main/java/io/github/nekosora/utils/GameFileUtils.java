@@ -1,11 +1,15 @@
 package io.github.nekosora.utils;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
 public class GameFileUtils {
+    private static final Logger log = LoggerFactory.getLogger(GameFileUtils.class);
     // 存储需要删除的文件和目录
     private static final Set<File> filesToDelete = Collections.synchronizedSet(new HashSet<>());
     // 存储需要保留的文件和目录（白名单）
@@ -132,10 +136,10 @@ public class GameFileUtils {
                         Files.delete(file.toPath());
                     }
                     deletedFiles.add(file);
-                    System.out.println("Deleted: " + file.getAbsolutePath());
+                    log.info("Deleted: {}", file.getAbsolutePath());
                 }
             } catch (IOException e) {
-                System.err.println("Failed to delete: " + file.getAbsolutePath() + " - " + e.getMessage());
+                log.error("Failed to delete: {} - {}", file.getAbsolutePath(), e.getMessage());
                 success = false;
             }
         }
