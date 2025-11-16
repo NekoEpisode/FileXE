@@ -9,7 +9,6 @@ import io.github.nekosora.utils.GameUtils;
 
 import java.awt.*;
 import java.io.File;
-import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,7 +18,7 @@ public class Main {
                 Desktop.getDesktop().open(GameSettings.mainDir);
             }
 
-            FileEventCatcher exitGameCatcher = new FileEventCatcher(new File(GameSettings.mainDir, "ExitGame.on"), (data) -> {
+            FileEventCatcher exitGameCatcher = new FileEventCatcher(new File(GameSettings.mainDir, "ExitGame.off"), (data) -> {
                 File newFile;
                 if (data != null && data[3] instanceof File file)
                     newFile = file;

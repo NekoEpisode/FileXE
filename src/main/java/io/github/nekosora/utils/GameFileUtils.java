@@ -66,7 +66,7 @@ public class GameFileUtils {
             }
         }
 
-        File exitGameOff = new File(root, "ExitGame.on");
+        File exitGameOff = new File(root, "ExitGame.off");
         if (!exitGameOff.exists()) {
             if (!exitGameOff.createNewFile()) {
                 System.err.println("Could not create " + exitGameOff.getAbsolutePath());
