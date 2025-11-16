@@ -6,11 +6,15 @@ import io.github.nekosora.settings.GameSettings;
 import io.github.nekosora.utils.CrashUtils;
 import io.github.nekosora.utils.GameFileUtils;
 import io.github.nekosora.utils.GameUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.File;
 
 public class Main {
+    private static final Logger log = LoggerFactory.getLogger(Main.class);
+
     public static void main(String[] args) {
         try {
             if (!GameFileUtils.checkAndCreateMainDir(GameSettings.mainDir)) return;
@@ -42,7 +46,7 @@ public class Main {
                 }
             }, FileEventType.RENAMED);
             singleplayerCatcher.start();
-
+            log.info("FileXE已启动！");
             while (true) {
                 Thread.sleep(1000);
             }
