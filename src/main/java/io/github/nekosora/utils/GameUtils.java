@@ -1,5 +1,6 @@
 package io.github.nekosora.utils;
 
+import io.github.nekosora.api.file.widgets.FileButton;
 import io.github.nekosora.context.GameContext;
 import io.github.nekosora.settings.GameSettings;
 import org.slf4j.Logger;
@@ -23,7 +24,8 @@ public class GameUtils {
             }
         }
 
-        GameFileUtils.cleanupMarkedFiles();
+        GameMenuUtils.cleanupMarkedFiles();
+        FileButton.shutdown();
 
         log.info("Bye!");
         System.exit(0);

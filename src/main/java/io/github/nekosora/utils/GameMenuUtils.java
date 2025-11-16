@@ -8,33 +8,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
-public class GameFileUtils {
-    private static final Logger log = LoggerFactory.getLogger(GameFileUtils.class);
+public class GameMenuUtils {
+    private static final Logger log = LoggerFactory.getLogger(GameMenuUtils.class);
     // 存储需要删除的文件和目录
     private static final Set<File> filesToDelete = Collections.synchronizedSet(new HashSet<>());
     // 存储需要保留的文件和目录（白名单）
     private static final Set<File> filesToKeep = Collections.synchronizedSet(new HashSet<>());
 
-    public static boolean checkAndCreateMainDir(File root) throws IOException {
-        // 清空之前的列表
-        filesToDelete.clear();
-        filesToKeep.clear();
-
+    /**
+     * 初始化游戏主菜单目录结构
+     * 可以随时调用，如果目录已存在则不会重复创建
+     */
+    public static boolean initializeGameMenu(File root) throws IOException {
         // 创建目录结构
         File settingsDir = createDirectory(root, "Settings");
         File generalOptions = createDirectory(settingsDir, "General");
         File aboutDir = createDirectory(root, "About");
         File playDir = createDirectory(root, "Play");
 
-        if (settingsDir == null || generalOptions == null || aboutDir == null) {
+        if (settingsDir == null || generalOptions == null || aboutDir == null || playDir == null) {
             return false;
         }
-
-        markForDeletion(settingsDir);
-        markForDeletion(generalOptions);
-        markForDeletion(aboutDir);
-        markForDeletion(playDir);
-        markForDeletion(root);
 
         // 创建文件
         Map<File, String> filesToCreate = Map.of(
@@ -58,33 +52,104 @@ public class GameFileUtils {
             if (!createFileWithContent(entry.getKey(), entry.getValue())) {
                 return false;
             }
-            // 默认情况下，新创建的文件标记为删除
-            markForDeletion(entry.getKey());
         }
 
+        // 处理退出游戏文件
         File exitGameOn = new File(root, "ExitGame.on");
+        File exitGameOff = new File(root, "ExitGame.off");
+
+        // 如果存在.on文件，删除它
         if (exitGameOn.exists()) {
             if (!exitGameOn.delete()) {
-                System.err.println("Could not delete " + exitGameOn.getAbsolutePath());
-                return false;
+                log.warn("Could not delete {}", exitGameOn.getAbsolutePath());
             }
         }
 
-        File exitGameOff = new File(root, "ExitGame.off");
+        // 创建.off文件（如果不存在）
         if (!exitGameOff.exists()) {
-            if (!exitGameOff.createNewFile()) {
-                System.err.println("Could not create " + exitGameOff.getAbsolutePath());
+            if (!createFileWithContent(exitGameOff, "Would you want to exit game?")) {
                 return false;
             }
-            Files.writeString(exitGameOff.toPath(), "Would you want to exit game?");
         }
 
-        markForDeletion(exitGameOff);
-        markForDeletion(exitGameOn);
-
-        System.out.println("All directories and files were checked and created successfully");
+        log.info("Game menu initialized successfully at: {}", root.getAbsolutePath());
         return true;
     }
+
+    /**
+     * 检查游戏菜单是否已初始化
+     */
+    public static boolean isGameMenuInitialized(File root) {
+        File[] requiredDirs = {
+                new File(root, "Settings"),
+                new File(root, "Settings/General"),
+                new File(root, "About"),
+                new File(root, "Play")
+        };
+
+        File[] requiredFiles = {
+                new File(root, "FileXE - Main Menu"),
+                new File(root, "Settings/General/NothingHere..."),
+                new File(root, "About/Authors.about"),
+                new File(root, "About/GameVersion.about"),
+                new File(root, "Play/Singleplayer.off"),
+                new File(root, "Play/Multiplayer.off"),
+                new File(root, "ExitGame.off")
+        };
+
+        // 检查所有必需目录是否存在
+        for (File dir : requiredDirs) {
+            if (!dir.exists() || !dir.isDirectory()) {
+                return false;
+            }
+        }
+
+        // 检查所有必需文件是否存在
+        for (File file : requiredFiles) {
+            if (!file.exists() || !file.isFile()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * 清理游戏菜单（选择性删除，不删除root目录）
+     */
+    public static boolean cleanupGameMenu(File root) {
+        boolean success = true;
+
+        // 定义要删除的文件和目录（不包括root）
+        List<File> itemsToDelete = Arrays.asList(
+                new File(root, "Settings"),
+                new File(root, "About"),
+                new File(root, "Play"),
+                new File(root, "FileXE - Main Menu"),
+                new File(root, "ExitGame.on"),
+                new File(root, "ExitGame.off")
+        );
+
+        for (File item : itemsToDelete) {
+            if (item.exists()) {
+                try {
+                    if (item.isDirectory()) {
+                        deleteDirectoryRecursively(item);
+                    } else {
+                        Files.delete(item.toPath());
+                    }
+                    log.info("Deleted: {}", item.getAbsolutePath());
+                } catch (IOException e) {
+                    log.error("Failed to delete: {} - {}", item.getAbsolutePath(), e.getMessage());
+                    success = false;
+                }
+            }
+        }
+
+        return success;
+    }
+
+    // 以下方法保持原有功能，但不再自动调用删除逻辑
 
     // 标记文件/目录为需要删除
     public static void markForDeletion(File file) {
@@ -118,7 +183,7 @@ public class GameFileUtils {
         return filesToKeep.contains(file);
     }
 
-    // 执行删除操作
+    // 执行删除操作（手动调用）
     public static boolean cleanupMarkedFiles() {
         boolean success = true;
         List<File> deletedFiles = new ArrayList<>();
@@ -167,7 +232,7 @@ public class GameFileUtils {
     private static File createDirectory(File parent, String dirName) {
         File dir = new File(parent, dirName);
         if (!dir.exists() && !dir.mkdirs()) {
-            System.err.println("Error creating directory: " + dir.getAbsolutePath());
+            log.error("Error creating directory: {}", dir.getAbsolutePath());
             return null;
         }
         return dir;
@@ -176,13 +241,13 @@ public class GameFileUtils {
     private static boolean createFileWithContent(File file, String content) {
         try {
             if (!file.exists() && !file.createNewFile()) {
-                System.err.println("Error creating file: " + file.getAbsolutePath());
+                log.error("Error creating file: {}", file.getAbsolutePath());
                 return false;
             }
             Files.writeString(file.toPath(), content);
             return true;
         } catch (IOException e) {
-            System.err.println("Error writing to file: " + file.getAbsolutePath() + " - " + e.getMessage());
+            log.error("Error writing to file: {} - {}", file.getAbsolutePath(), e.getMessage());
             return false;
         }
     }
