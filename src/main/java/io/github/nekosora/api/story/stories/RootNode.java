@@ -11,11 +11,13 @@ public class RootNode extends StoryNode {
 
     @Override
     public void execute() {
+        super.execute();
         if (getNextNode(NodeIDs.CHAPTER1.getId()) == null) throw new NodeNotFoundError("Chapter1 node not found, please addNext instead");
 
         StoryNode chapter1 = getNextNode(NodeIDs.CHAPTER1.getId());
         chapter1.execute();
 
         // 顺序执行
+        // TODO: 添加更多剧情
     }
 }

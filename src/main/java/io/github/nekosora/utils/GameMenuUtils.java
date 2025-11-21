@@ -185,6 +185,7 @@ public class GameMenuUtils {
 
     // 执行删除操作（手动调用）
     public static boolean cleanupMarkedFiles() {
+        System.out.println("called");
         boolean success = true;
         List<File> deletedFiles = new ArrayList<>();
 
@@ -193,11 +194,15 @@ public class GameMenuUtils {
         files.sort((f1, f2) -> Boolean.compare(f1.isDirectory(), f2.isDirectory()));
 
         for (File file : files) {
+            System.out.println("遍历");
             try {
                 if (file.exists()) {
+                    System.out.println("存在");
                     if (file.isDirectory()) {
+                        System.out.println("文件夹");
                         deleteDirectoryRecursively(file);
                     } else {
+                        System.out.println("删除文件");
                         Files.delete(file.toPath());
                     }
                     deletedFiles.add(file);

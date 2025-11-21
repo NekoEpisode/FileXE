@@ -1,6 +1,5 @@
 package io.github.nekosora.utils;
 
-import io.github.nekosora.context.GameContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,7 +14,6 @@ public class CrashUtils {
 
     public static void crash(Throwable e) {
         try {
-            if (GameContext.isExiting) return; // 如果游戏正在关闭，那就没必要显示错误了
             log.error("Oh no! Game crashed!!!!");
             File crashedLogDir = new File("./crash_reports/");
             if (!crashedLogDir.exists()) crashedLogDir.mkdir();
@@ -33,7 +31,7 @@ public class CrashUtils {
             StringWriter sw = new StringWriter();
             PrintWriter pw = new PrintWriter(sw);
             e.printStackTrace(pw);
-            System.err.println("Oops, FileXE's crash handler crashed!\nStackTrace:\n" + sw);
+            log.error("Oops, FileXE's crash handler crashed!\nStackTrace:\n{}", sw);
             GameUtils.exitGame(GameUtils.ExitReason.crashed);
         }
     }

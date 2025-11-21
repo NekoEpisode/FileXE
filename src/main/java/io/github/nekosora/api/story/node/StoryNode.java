@@ -1,5 +1,7 @@
 package io.github.nekosora.api.story.node;
 
+import io.github.nekosora.context.GameContext;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -27,7 +29,11 @@ public abstract class StoryNode {
         return null;
     }
 
-    public abstract void execute();
+    public void execute() {
+        GameContext.singleplayerCurrentNode = this;
+    }
+
+    public void cleanFiles() {}
 
     public void addNext(StoryNode node) {
         if (node == null) return;

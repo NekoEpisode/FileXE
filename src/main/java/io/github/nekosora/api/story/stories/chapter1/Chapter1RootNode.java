@@ -11,6 +11,7 @@ public class Chapter1RootNode extends StoryNode {
 
     @Override
     public void execute() {
+        super.execute();
         if (getNextNode(NodeIDs.CHAPTER1_FIRST_SEEN.getId()) == null) throw new NodeNotFoundError("Chapter1FirstSeen node not found, please addNext instead");
 
         StoryNode firstSeen = getNextNode(NodeIDs.CHAPTER1_FIRST_SEEN.getId());

@@ -16,7 +16,4 @@ public class EmptyStoryNode extends StoryNode {
     public String getDescription() {
         return description;
     }
-
-    @Override
-    public void execute() {}
 }
